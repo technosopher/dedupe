@@ -1,7 +1,6 @@
-#TODO: Add yet another dictionary to store and report conflicts
-#TODO: Get rid of the counter_dict
-#TODO: Make the output automatically show whatever fields are specified in fieldsets
 #TODO: Write out all the dicts as separate CSVs
+#TODO: Decompose
+#TODO: Conflict dict can only store a single conflict set
 
 import csv
 deduped_dict={}
@@ -29,7 +28,7 @@ with open("full_set.csv", "rb") as csvfile:
      if len(merged_row[i]) < 1 and len(this_row[i]) > 1:
       merged_row[i] = this_row[i]
      elif len(merged_row[i]) > 0 and len(this_row[i]) > 0 and merged_row[i] != this_row[i]:
-      conflict_dict[linecounter][i] = this_row[i]
+      conflict_dict[linecounter][i] = this_row[i] #
     deduped_dict[token] = [linecounter,merged_row]
     master_lines.pop(original_row[0])
     master_lines[linecounter] = merged_row
@@ -48,13 +47,21 @@ with open("full_set.csv", "rb") as csvfile:
  
 final_counter = 0
 max_counter = 0
+master_fieldset = []
+for fieldset in fieldsets_to_match:
+ for field in fieldset:
+  if field not in master_fieldset:
+   master_fieldset.append(field)
+print master_fieldset
+
 for key, value in dup_dict.iteritems():
  if len(value) > 1:
   print key,len(value)
-  print "Final row: ", deduped_dict[key][1][0], deduped_dict[key][1][1], deduped_dict[key][1][5], deduped_dict[key][1][6], deduped_dict[key][1][8], deduped_dict[key][1][9], deduped_dict[key][1][10]
+  field_values = [];
+  print "Final row: ", [deduped_dict[key][1][field_value] for field_value in master_fieldset] 
   print "Duplicate rows were: ", len(dup_dict[key])
   for i in range (0, len(dup_dict[key])):
-   print "Line Number:", dup_dict[key][i][0],":", dup_dict[key][i][1][0], dup_dict[key][i][1][1], dup_dict[key][i][1][5], dup_dict[key][i][1][6], dup_dict[key][i][1][8], dup_dict[key][i][1][9]
+   print "Line Number:", dup_dict[key][i][0],":", [dup_dict[key][i][1][field_value] for field_value in master_fieldset] 
   print "-------------------------------------"
   final_counter += 1
   if len(value) > max_counter:
@@ -72,4 +79,4 @@ with open("cleaned.csv","wb") as csvfileout:
    if len(conflict_dict[key]) > 0:
     conflictcounter += 1
   writer.writerow(value)
- print conflictcounter,"rows have conflictin values"
+ print conflictcounter,"rows have conflicting values"
